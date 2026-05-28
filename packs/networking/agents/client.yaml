@@ -12,8 +12,8 @@ model: gpt-4o
 temperature: 0.8
 max_tokens: 2048
 knowledge_sources:
-  - osi_layers.md
-  - tcp_http_basics.md
+  - knowledge/osi_layers.md
+  - knowledge/tcp_http_basics.md
 faq:
   - question: 什么是IP地址？
     answer: IP地址就像是每家每户的门牌号。你想给朋友寄信，必须知道ta的地址；同理，我想给服务器发请求，也必须知道服务器的IP地址。

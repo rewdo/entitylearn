@@ -13,7 +13,7 @@ model: gpt-4o
 temperature: 0.7
 max_tokens: 2048
 knowledge_sources:
-  - ethernet_basics.md
+  - knowledge/ethernet_basics.md
 faq:
   - question: 你和路由器有什么区别？
     answer: 最简单的区别：我只看MAC地址（第二层），路由器看IP地址（第三层）。我负责同一网络内部的转发，路由器负责跨网络转发。就像快递分拣——我只管同一栋楼里的房间号，路由器管不同城市之间的运输。

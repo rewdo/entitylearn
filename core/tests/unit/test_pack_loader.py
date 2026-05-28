@@ -19,16 +19,17 @@ def sample_pack_dir():
         # pack.yaml
         pack_yaml = base / "pack.yaml"
         pack_yaml.write_text("""
-meta:
-  id: sample_pack
-  name: 示例知识包
-  version: "0.1.0"
-  description: 用于测试的示例知识包
-  domain: education
-  language: zh-CN
-  entrypoints:
-    - agents/
-    - scenes/
+id: sample_pack
+name: 示例知识包
+version: "0.1.0"
+description: 用于测试的示例知识包
+domain: education
+language: zh-CN
+schema_version: "1.0"
+license: MIT
+entrypoints:
+  agents: agents
+  scenes: scenes
 """, encoding="utf-8")
 
         # agents 目录

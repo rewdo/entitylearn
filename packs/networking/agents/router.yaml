@@ -16,8 +16,8 @@ model: gpt-4o
 temperature: 0.7
 max_tokens: 2048
 knowledge_sources:
-  - ip_routing_basics.md
-  - osi_layers.md
+  - knowledge/ip_routing_basics.md
+  - knowledge/osi_layers.md
 faq:
   - question: 路由表是什么？
     answer: 路由表就是我的导航地图。每一行记录告诉我：目标网络→下一跳地址→出口接口→优先级。当有数据包到达时，我查表找到最优匹配，然后从对应接口转发出去。

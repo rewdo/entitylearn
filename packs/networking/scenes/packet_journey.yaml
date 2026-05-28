@@ -26,7 +26,7 @@ flow:
       它需要先问清楚：这个域名对应的IP地址是什么？
     speaker: null
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 2
     type: dialogue
@@ -36,7 +36,7 @@ flow:
       "好吧，得问DNS服务器了。"
     speaker: client
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 3
     type: dialogue
@@ -49,7 +49,7 @@ flow:
       最后联系权威DNS："`www.example.com` 的IP是什么？"
     speaker: dns_server
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 4
     type: narration
@@ -58,7 +58,7 @@ flow:
       它把这个结果缓存下来（TTL=3600秒），然后返回给客户端。
     speaker: null
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 5
     type: dialogue
@@ -72,8 +72,8 @@ flow:
       "好，开始封装数据包！"
     speaker: client
     source_refs:
-      - ethernet_basics.md
-      - ip_routing_basics.md
+      - knowledge/ethernet_basics.md
+      - knowledge/ip_routing_basics.md
 
   - step: 6
     type: narration
@@ -88,7 +88,7 @@ flow:
       点击继续，看看这个数据包如何在网络中穿行。
     speaker: null
     source_refs:
-      - tcp_http_basics.md
+      - knowledge/tcp_http_basics.md
 
   - step: 7
     type: dialogue
@@ -99,7 +99,7 @@ flow:
       数据帧从网卡发出，沿着网线……来到了交换机面前。
     speaker: client
     source_refs:
-      - tcp_http_basics.md
+      - knowledge/tcp_http_basics.md
 
   - step: 8
     type: dialogue
@@ -112,7 +112,7 @@ flow:
       （顺便说一句，我还悄悄把源MAC `BB:BB:BB:BB:BB:01` 记了下来——在端口3——以后发往这个MAC的帧就不用广播了。）
     speaker: switch
     source_refs:
-      - ethernet_basics.md
+      - knowledge/ethernet_basics.md
 
   - step: 9
     type: narration
@@ -121,7 +121,7 @@ flow:
       帧的目标MAC是路由器自己的MAC地址，路由器接收它，开始处理IP层。
     speaker: null
     source_refs:
-      - ip_routing_basics.md
+      - knowledge/ip_routing_basics.md
 
   - step: 10
     type: dialogue
@@ -138,7 +138,7 @@ flow:
       "一路顺风！"
     speaker: router
     source_refs:
-      - ip_routing_basics.md
+      - knowledge/ip_routing_basics.md
 
   - step: 11
     type: narration
@@ -154,7 +154,7 @@ flow:
       互联网就是这样一层层转发，把数据包送到世界任何一个角落。
     speaker: null
     source_refs:
-      - ip_routing_basics.md
+      - knowledge/ip_routing_basics.md
 
   - step: 12
     type: narration
@@ -165,8 +165,8 @@ flow:
       交换机查MAC地址表，精确转发到Web服务器所在的端口。
     speaker: null
     source_refs:
-      - ip_routing_basics.md
-      - ethernet_basics.md
+      - knowledge/ip_routing_basics.md
+      - knowledge/ethernet_basics.md
 
   - step: 13
     type: dialogue
@@ -180,7 +180,7 @@ flow:
       "三次握手完成！TCP连接已建立。现在等它发HTTP请求过来。"
     speaker: web_server
     source_refs:
-      - tcp_http_basics.md
+      - knowledge/tcp_http_basics.md
 
   - step: 14
     type: dialogue
@@ -198,7 +198,7 @@ flow:
       这次路径和SYN包差不多，交换机→路由器→……→目标网络→Web服务器。
     speaker: client
     source_refs:
-      - tcp_http_basics.md
+      - knowledge/tcp_http_basics.md
 
   - step: 15
     type: dialogue
@@ -220,7 +220,7 @@ flow:
       "响应打包好了，原路返回！"
     speaker: web_server
     source_refs:
-      - tcp_http_basics.md
+      - knowledge/tcp_http_basics.md
 
   - step: 16
     type: narration
@@ -231,8 +231,8 @@ flow:
       每一跳依然是查表转发，但因为沿途设备已经学习了MAC地址映射（交换机）和路由信息，转发效率很高。
     speaker: null
     source_refs:
-      - ethernet_basics.md
-      - ip_routing_basics.md
+      - knowledge/ethernet_basics.md
+      - knowledge/ip_routing_basics.md
 
   - step: 17
     type: dialogue
@@ -247,7 +247,7 @@ flow:
       "任务完成！从输入URL到页面显示，看起来只是一瞬间——但背后经过了这么多步骤。"
     speaker: client
     source_refs:
-      - tcp_http_basics.md
+      - knowledge/tcp_http_basics.md
 
   - step: 18
     type: narration
@@ -268,11 +268,11 @@ flow:
       这就是互联网通信的完整图景——每一层各司其职，协同工作，让世界互联。
     speaker: null
     source_refs:
-      - osi_layers.md
-      - dns_basics.md
-      - ethernet_basics.md
-      - ip_routing_basics.md
-      - tcp_http_basics.md
+      - knowledge/osi_layers.md
+      - knowledge/dns_basics.md
+      - knowledge/ethernet_basics.md
+      - knowledge/ip_routing_basics.md
+      - knowledge/tcp_http_basics.md
 
 breakpoints:
   - step: 6

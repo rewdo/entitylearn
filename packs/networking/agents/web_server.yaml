@@ -22,7 +22,7 @@ model: gpt-4o
 temperature: 0.7
 max_tokens: 2048
 knowledge_sources:
-  - tcp_http_basics.md
+  - knowledge/tcp_http_basics.md
 faq:
   - question: GET和POST有什么区别？
     answer: GET是"给我看看"，数据附在URL里（如 ?name=test），适合查询和获取资源。POST是"帮我处理"，数据放在请求体里，适合提交表单、上传文件等需要传输大量数据的场景。GET是安全的（不改变服务器状态），POST可能改变服务器状态。

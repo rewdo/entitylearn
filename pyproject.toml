@@ -31,6 +31,8 @@ dependencies = [
     "uvicorn[standard]>=0.27",
     "pydantic>=2.5",
     "httpx>=0.26",
+    "typer>=0.9",
+    "jieba>=0.42",
 ]
 
 [project.optional-dependencies]

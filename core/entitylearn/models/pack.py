@@ -13,6 +13,21 @@ from .scene import Scene
 from .test_case import TestSuite
 
 
+class Author(BaseModel):
+    """作者信息"""
+    name: str = Field(..., description="作者名称")
+    email: Optional[str] = Field(default=None, description="邮箱")
+    url: Optional[str] = Field(default=None, description="个人主页")
+
+
+class Entrypoints(BaseModel):
+    """知识包入口路径配置"""
+    agents: str = Field(default="agents", description="Agent 文件目录")
+    scenes: str = Field(default="scenes", description="场景文件目录")
+    knowledge: str = Field(default="knowledge", description="知识文档目录")
+    tests: str = Field(default="tests", description="测试文件目录")
+
+
 class PackMeta(BaseModel):
     """知识包的元数据"""
 
@@ -22,13 +37,13 @@ class PackMeta(BaseModel):
     description: str = Field(default="", description="包描述")
     domain: str = Field(default="general", description="领域: education/legal/medical/tech 等")
     language: str = Field(default="zh-CN", description="主要语言")
-    authors: list[str] = Field(default_factory=list, description="作者列表")
+    authors: list[Author] = Field(default_factory=list, description="作者列表")
     license: str = Field(default="MIT", description="许可证")
     schema_version: str = Field(default="1.0", description="Schema 版本")
 
-    entrypoints: list[str] = Field(
-        default_factory=lambda: ["scenes/", "agents/"],
-        description="入口文件/目录列表",
+    entrypoints: Entrypoints = Field(
+        default_factory=Entrypoints,
+        description="包内资源入口路径",
     )
     tags: list[str] = Field(default_factory=list, description="标签")
     compatibility: dict[str, str] = Field(
@@ -65,7 +80,7 @@ class Pack(BaseModel):
             raise ValueError(f"Empty pack YAML: {path}")
 
         # 解析 meta
-        meta = PackMeta(**raw.get("meta", raw))
+        meta = PackMeta(**raw)
 
         # agents/scenes/tests 由 loader 从 entrypoints 加载
         return cls(meta=meta, agents=[], scenes=[], tests=[])

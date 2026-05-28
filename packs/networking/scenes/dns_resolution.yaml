@@ -21,7 +21,7 @@ flow:
       这个问题的答案，就藏在DNS系统里。
     speaker: null
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 2
     type: dialogue
@@ -35,7 +35,7 @@ flow:
       DNS查询用的是UDP，端口53——不需要建立连接，直接发过去就行。
     speaker: client
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 3
     type: dialogue
@@ -51,7 +51,7 @@ flow:
       "根服务器你好，请问 `.com` 的TLD服务器在哪里？"
     speaker: dns_server
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 4
     type: narration
@@ -61,7 +61,7 @@ flow:
       根服务器不直接知道 `github.com` 的IP，但它知道该找谁问 `.com` 域名的事。
     speaker: null
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 5
     type: dialogue
@@ -80,7 +80,7 @@ flow:
       GitHub使用了4台权威DNS服务器做冗余，任意一台都能给出准确答案。👍
     speaker: dns_server
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 6
     type: narration
@@ -89,7 +89,7 @@ flow:
       这是解析链条的最后一级——如果权威DNS也不知道，那就真的没人知道了。
     speaker: null
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 7
     type: dialogue
@@ -103,7 +103,7 @@ flow:
       GitHub使用较短的TTL，方便快速切换IP应对DDoS攻击或服务器迁移。
     speaker: dns_server
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 8
     type: dialogue
@@ -118,7 +118,7 @@ flow:
       下次再查 `github.com` 的另一个子域名（比如 `api.github.com`），就不用再问根和TLD了，直接问权威DNS就行！
     speaker: dns_server
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 9
     type: narration
@@ -133,7 +133,7 @@ flow:
       现在客户端有了IP地址，可以开始TCP连接了。
     speaker: null
     source_refs:
-      - dns_basics.md
+      - knowledge/dns_basics.md
 
   - step: 10
     type: dialogue
@@ -149,8 +149,8 @@ flow:
       "去吧，和GitHub服务器握手！"
     speaker: client
     source_refs:
-      - tcp_http_basics.md
-      - ip_routing_basics.md
+      - knowledge/tcp_http_basics.md
+      - knowledge/ip_routing_basics.md
 
   - step: 11
     type: narration
@@ -168,8 +168,8 @@ flow:
       这条记录，将在接下来的5分钟内，服务于这台电脑上所有要访问GitHub的请求。
     speaker: null
     source_refs:
-      - dns_basics.md
-      - tcp_http_basics.md
+      - knowledge/dns_basics.md
+      - knowledge/tcp_http_basics.md
 
 breakpoints:
   - step: 9

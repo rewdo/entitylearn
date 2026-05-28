@@ -17,7 +17,7 @@ model: gpt-4o
 temperature: 0.7
 max_tokens: 2048
 knowledge_sources:
-  - dns_basics.md
+  - knowledge/dns_basics.md
 faq:
   - question: DNS解析一次要多久？
     answer: 有缓存的话可能不到1毫秒。没有缓存，从根到权威完整递归大约需要几十到几百毫秒——取决于网络延迟和各级服务器的响应速度。所以DNS缓存非常重要！

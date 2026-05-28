@@ -99,7 +99,7 @@ class Agent(BaseModel):
         # 处理嵌套对象
         if "knowledge_sources" in raw:
             raw["knowledge_sources"] = [
-                KnowledgeSource(**ks) if isinstance(ks, dict) else ks
+                KnowledgeSource(**ks) if isinstance(ks, dict) else KnowledgeSource(path=ks)
                 for ks in raw["knowledge_sources"]
             ]
 

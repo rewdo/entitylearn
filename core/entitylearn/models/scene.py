@@ -22,20 +22,25 @@ class FlowStep(BaseModel):
 
     step_id: str = Field(..., description="步骤唯一标识")
     type: str = Field(default="narration", description="步骤类型: narration/dialogue/question/breakpoint/visual")
-    speaker: str = Field(default="system", description="说话人: system 或 agent_id")
+    speaker: str | None = Field(default=None, description="说话人: null 或 agent_id")
     content: str = Field(default="", description="步骤内容")
     source_refs: list[SourceRef] = Field(
         default_factory=list, description="引用的来源"
     )
     visual_hint: str = Field(default="", description="可视化提示（图片/图表引用）")
-    actions: list[str] = Field(default_factory=list, description="可选动作")
+    actions: list[dict] = Field(default_factory=list, description="可选动作")
     next_step_id: str | None = Field(default=None, description="下一步骤 ID")
+
+    @property
+    def is_breakpoint(self) -> bool:
+        return self.type == "breakpoint"
 
 
 class Participant(BaseModel):
     """场景参与者"""
 
     agent_id: str = Field(..., description="参与的 Agent ID")
+    display_name: str = Field(default="", description="展示名称")
     role_in_scene: str = Field(default="speaker", description="在场景中的角色")
     speaking_style: str = Field(default="", description="说话风格提示")
 
@@ -44,6 +49,7 @@ class Breakpoint(BaseModel):
     """交互断点"""
 
     step_id: str = Field(..., description="断点所在的步骤 ID")
+    label: str = Field(default="", description="断点标签")
     prompt: str = Field(default="", description="提示用户输入的文字")
     allowed_agents: list[str] = Field(
         default_factory=list, description="允许此断点触发哪些 Agent 回答"
@@ -87,14 +93,6 @@ class Scene(BaseModel):
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "Scene":
-        """从 YAML 文件加载 Scene 定义。
-
-        Args:
-            path: scene YAML 文件路径
-
-        Returns:
-            解析后的 Scene 对象
-        """
         path = Path(path)
         if not path.exists():
             raise FileNotFoundError(f"Scene YAML not found: {path}")
@@ -105,48 +103,65 @@ class Scene(BaseModel):
         if raw is None:
             raise ValueError(f"Empty scene YAML: {path}")
 
-        # 处理嵌套对象
+        # 归一化：participants 的 agent -> agent_id
         if "participants" in raw:
-            raw["participants"] = [
-                Participant(**p) if isinstance(p, dict) else p
-                for p in raw["participants"]
-            ]
+            for p in raw["participants"]:
+                if isinstance(p, dict) and "agent" in p and "agent_id" not in p:
+                    p["agent_id"] = p.pop("agent")
 
-        if "breakpoints" in raw:
-            raw["breakpoints"] = [
-                Breakpoint(**bp) if isinstance(bp, dict) else bp
-                for bp in raw["breakpoints"]
-            ]
-
+        # 归一化：flow 的 step -> step_id, speaker null -> None, source_refs 字符串 -> 对象
         if "flow" in raw:
-            raw["flow"] = [
-                FlowStep(**step) if isinstance(step, dict) else step
-                for step in raw["flow"]
-            ]
-            # 处理嵌套 source_refs
-            for i, step in enumerate(raw["flow"]):
-                if isinstance(step, FlowStep) and step.source_refs:
-                    step.source_refs = [
-                        SourceRef(**sr) if isinstance(sr, dict) else sr
-                        for sr in step.source_refs
-                    ]
+            for step in raw["flow"]:
+                if isinstance(step, dict):
+                    if "step" in step and "step_id" not in step:
+                        step["step_id"] = str(step.pop("step"))
+                    if step.get("speaker") is None:
+                        step["speaker"] = None
+                    # 转换字符串 source_refs 为 SourceRef 对象
+                    if "source_refs" in step:
+                        step["source_refs"] = [
+                            SourceRef(path=sr) if isinstance(sr, str) else SourceRef(**sr)
+                            for sr in step["source_refs"]
+                        ]
+                    # 处理 actions
+                    if "actions" in step and step["actions"] is None:
+                        step["actions"] = []
 
-        if "metadata" in raw and isinstance(raw["metadata"], dict):
-            raw["metadata"] = SceneMetadata(**raw["metadata"])
+        # 归一化：breakpoints 的 step -> step_id
+        if "breakpoints" in raw:
+            for bp in raw["breakpoints"]:
+                if isinstance(bp, dict) and "step" in bp and "step_id" not in bp:
+                    bp["step_id"] = str(bp.pop("step"))
+
+        # 归一化：difficulty -> metadata.difficulty, estimated_duration -> metadata
+        meta_fields = {}
+        if "difficulty" in raw:
+            meta_fields["difficulty"] = raw.pop("difficulty")
+        if "estimated_duration" in raw:
+            dur = raw.pop("estimated_duration")
+            if isinstance(dur, str) and dur.endswith("m"):
+                meta_fields["estimated_duration_min"] = int(dur[:-1])
+            elif isinstance(dur, (int, float)):
+                meta_fields["estimated_duration_min"] = int(dur)
+        if "tags" in raw and isinstance(raw.get("tags"), list):
+            meta_fields["tags"] = raw.pop("tags")
+        if meta_fields and "metadata" not in raw:
+            raw["metadata"] = meta_fields
+
+        # 移除不需要的字段
+        for key in ["pack_id", "domain"]:
+            raw.pop(key, None)
 
         return cls(**raw)
 
     def get_step(self, step_id: str) -> FlowStep | None:
-        """按 step_id 查找步骤"""
         for step in self.flow:
             if step.step_id == step_id:
                 return step
         return None
 
     def get_first_step(self) -> FlowStep | None:
-        """获取第一个步骤"""
         return self.flow[0] if self.flow else None
 
     def get_step_ids(self) -> set[str]:
-        """获取所有步骤 ID"""
         return {step.step_id for step in self.flow}

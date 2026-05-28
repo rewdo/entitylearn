@@ -177,11 +177,16 @@ class KnowledgeIndexer:
         return doc_path.stem
 
     def _tokenize(self, text: str) -> set[str]:
-        """分词：提取≥2字符的词"""
+        """分词：优先使用 jieba 中文分词，回退到正则"""
         # 移除 markdown 标记
         text = re.sub(r"[#*_`~\[\]()]", " ", text)
-        words = re.findall(r"[\u4e00-\u9fff\w]+", text.lower())
-        return {w for w in words if len(w) >= 2}
+        try:
+            import jieba
+            words = jieba.cut(text.lower())
+            return {w.strip() for w in words if len(w.strip()) >= 2}
+        except ImportError:
+            words = re.findall(r"[\u4e00-\u9fff\w]+", text.lower())
+            return {w for w in words if len(w) >= 2}
 
     def _split_by_headings(self, content: str) -> list[tuple[str, str]]:
         """按标题分节"""

@@ -11,6 +11,11 @@ import typer
 from . import __version__
 from .config import PACKS_DIR
 
+# Windows GBK 编码兼容：强制 stdout 使用 utf-8
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 app = typer.Typer(
     name="entitylearn",
     help="EntityLearn - 实体化知识讲解引擎",

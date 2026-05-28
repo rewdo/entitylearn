@@ -136,6 +136,8 @@ class SchemaValidator:
         # 校验 FlowStep.speaker 引用的 agent
         for scene in pack.scenes:
             for step in scene.flow:
+                if step.speaker is None:
+                    continue
                 if step.speaker not in ("system", "") and step.speaker not in agent_ids:
                     errors.append(
                         f"Scene '{scene.id}' step '{step.step_id}' "

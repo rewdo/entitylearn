@@ -12,6 +12,9 @@ from pydantic import BaseModel, Field
 class TestCase(BaseModel):
     """单个测试用例"""
 
+    id: str = Field(default="", description="测试用例 ID")
+    name: str = Field(default="", description="测试用例名称")
+    description: str = Field(default="", description="测试用例描述")
     input: str = Field(..., description="输入问题")
     expected_keywords: list[str] = Field(
         default_factory=list, description="期望回答中包含的关键词"
@@ -38,24 +41,17 @@ class TestSuite(BaseModel):
 
     id: str = Field(..., description="测试套件唯一标识")
     name: str = Field(default="", description="测试套件名称")
+    description: str = Field(default="", description="测试套件描述")
     target_type: str = Field(
-        default="agent", description="测试目标类型: agent/scene"
+        default="scene", description="测试目标类型: agent/scene"
     )
-    target_id: str = Field(..., description="测试目标 ID（Agent 或 Scene ID）")
+    target_id: str = Field(default="", description="测试目标 ID（Agent 或 Scene ID）")
     test_cases: list[TestCase] = Field(
         default_factory=list, description="测试用例列表"
     )
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "TestSuite":
-        """从 YAML 文件加载 TestSuite。
-
-        Args:
-            path: test YAML 文件路径
-
-        Returns:
-            解析后的 TestSuite 对象
-        """
         path = Path(path)
         if not path.exists():
             raise FileNotFoundError(f"Test YAML not found: {path}")
@@ -65,6 +61,14 @@ class TestSuite(BaseModel):
 
         if raw is None:
             raise ValueError(f"Empty test YAML: {path}")
+
+        # 归一化：自动检测 target_type
+        if "scene" in raw and "agent" not in raw:
+            raw["target_type"] = "scene"
+            raw["target_id"] = raw.pop("scene")
+        elif "agent" in raw:
+            raw["target_type"] = "agent"
+            raw["target_id"] = raw.pop("agent")
 
         if "test_cases" in raw:
             raw["test_cases"] = [
