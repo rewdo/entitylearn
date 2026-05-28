@@ -1,0 +1,156 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://entitylearn.dev/schema/pack.schema.json",
+  "title": "Knowledge Pack Schema",
+  "description": "Schema definition for an EntityLearn knowledge pack (pack.yaml)",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "version",
+    "description",
+    "domain",
+    "license",
+    "schema_version",
+    "entrypoints"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the pack. Lowercase alphanumeric with hyphens and underscores.",
+      "pattern": "^[a-z0-9_-]+$",
+      "minLength": 2,
+      "maxLength": 64,
+      "examples": ["networking", "legal-advisory", "medical_prelim"]
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable display name of the pack.",
+      "minLength": 1,
+      "maxLength": 128,
+      "examples": ["网络故障排查知识包", "法律咨询知识包"]
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the pack.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+      "examples": ["1.0.0", "0.2.0-beta", "0.1.0-alpha"]
+    },
+    "description": {
+      "type": "string",
+      "description": "A short description of what this pack covers.",
+      "minLength": 10,
+      "maxLength": 1024,
+      "examples": ["网络故障排查领域的AI知识包，包含网络工程师、NOC值班员等实体及BGP/OSPF故障排查场景"]
+    },
+    "domain": {
+      "type": "string",
+      "description": "Knowledge domain this pack belongs to.",
+      "minLength": 1,
+      "maxLength": 128,
+      "examples": ["networking", "legal", "medical", "education", "finance"]
+    },
+    "language": {
+      "type": "string",
+      "description": "Primary language code for this pack.",
+      "default": "zh-CN",
+      "examples": ["zh-CN", "en-US", "ja-JP"]
+    },
+    "authors": {
+      "type": "array",
+      "description": "List of pack authors.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Author's display name."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Author's email address."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Author's website or profile URL."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier for this pack.",
+      "minLength": 1,
+      "examples": ["MIT", "CC-BY-4.0", "Apache-2.0"]
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Version of the pack schema this file conforms to.",
+      "pattern": "^\\d+\\.\\d+$",
+      "examples": ["1.0"]
+    },
+    "entrypoints": {
+      "type": "object",
+      "description": "Path mappings to the pack's sub-resources.",
+      "required": ["agents", "scenes", "knowledge", "tests"],
+      "properties": {
+        "agents": {
+          "type": "string",
+          "description": "Relative path to agents directory.",
+          "examples": ["agents/"]
+        },
+        "scenes": {
+          "type": "string",
+          "description": "Relative path to scenes directory.",
+          "examples": ["scenes/"]
+        },
+        "knowledge": {
+          "type": "string",
+          "description": "Relative path to knowledge directory.",
+          "examples": ["knowledge/"]
+        },
+        "tests": {
+          "type": "string",
+          "description": "Relative path to tests directory.",
+          "examples": ["tests/"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tags for categorization and discovery.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "examples": [["networking", "troubleshooting", "bgp", "ospf"]]
+    },
+    "compatibility": {
+      "type": "object",
+      "description": "Engine version compatibility constraints.",
+      "properties": {
+        "min_engine_version": {
+          "type": "string",
+          "description": "Minimum compatible engine version (inclusive).",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)",
+          "examples": ["0.1.0"]
+        },
+        "max_engine_version": {
+          "type": "string",
+          "description": "Maximum compatible engine version (inclusive). Leave empty for no upper bound.",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)",
+          "examples": ["1.0.0"]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

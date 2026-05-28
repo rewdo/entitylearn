@@ -1,0 +1,31 @@
+# EntityLearn Pack Template
+# 复制此目录并修改以下内容来创建你的知识包
+
+id: my-pack
+name: My Knowledge Pack
+version: 0.1.0
+description: >
+  对这个知识包的简要描述。
+
+domain: general
+language: zh-CN
+
+authors:
+  - name: Your Name
+    email: your.email@example.com
+
+license: MIT
+schema_version: "1.0"
+
+entrypoints:
+  agents: agents/
+  scenes: scenes/
+  knowledge: knowledge/
+  tests: tests/
+
+tags:
+  - example
+  - template
+
+compatibility:
+  min_engine_version: 0.1.0

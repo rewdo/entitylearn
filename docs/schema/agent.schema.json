@@ -1,0 +1,210 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://entitylearn.dev/schema/agent.schema.json",
+  "title": "Agent Schema",
+  "description": "Schema definition for an EntityLearn agent (agent.yaml)",
+  "type": "object",
+  "required": ["id", "name", "description", "role"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the agent within the pack.",
+      "pattern": "^[a-z0-9_-]+$",
+      "minLength": 2,
+      "maxLength": 64
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable display name.",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of what this agent represents.",
+      "minLength": 10,
+      "maxLength": 1024
+    },
+    "role": {
+      "type": "string",
+      "description": "The professional role or title this agent plays.",
+      "minLength": 1,
+      "maxLength": 256,
+      "examples": ["Senior Network Engineer", "Legal Consultant", "Medical Advisor"]
+    },
+    "persona": {
+      "type": "string",
+      "description": "Detailed persona description including personality traits and background.",
+      "maxLength": 4096
+    },
+    "voice": {
+      "type": "string",
+      "description": "Guidance on how this agent speaks — tone, terminology, formality level.",
+      "maxLength": 2048,
+      "examples": ["专业严谨，使用技术术语，语气冷静", "Friendly and patient, avoids jargon, speaks in plain language"]
+    },
+    "first_person": {
+      "type": "boolean",
+      "description": "Whether this agent speaks in first person (I/we) or third person.",
+      "default": true
+    },
+    "responsibilities": {
+      "type": "array",
+      "description": "List of core responsibilities for this agent.",
+      "items": {
+        "type": "string",
+        "minLength": 3
+      },
+      "uniqueItems": true
+    },
+    "knowledge_sources": {
+      "type": "array",
+      "description": "Knowledge documents this agent can reference.",
+      "items": {
+        "type": "object",
+        "required": ["path", "type"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Relative path to the knowledge file."
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of knowledge source.",
+            "enum": ["document", "glossary", "procedure", "reference", "faq", "policy"]
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional display title for this source."
+          },
+          "note": {
+            "type": "string",
+            "description": "Optional note about when/how to use this source."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "forbidden_topics": {
+      "type": "array",
+      "description": "Topics this agent must not discuss.",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "scope": {
+      "type": "object",
+      "description": "Topic scope constraints for this agent.",
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "description": "Topics this agent is permitted to discuss.",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "disallowed": {
+          "type": "array",
+          "description": "Topics this agent must not discuss.",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "faq": {
+      "type": "array",
+      "description": "Pre-defined FAQ entries this agent can answer.",
+      "items": {
+        "type": "object",
+        "required": ["question", "answer"],
+        "properties": {
+          "question": {
+            "type": "string",
+            "description": "The question."
+          },
+          "answer": {
+            "type": "string",
+            "description": "The pre-authored answer."
+          },
+          "sources": {
+            "type": "array",
+            "description": "Source references supporting this answer.",
+            "items": {
+              "type": "object",
+              "required": ["path"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Path to the source document."
+                },
+                "quote": {
+                  "type": "string",
+                  "description": "Relevant quote from the source."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "style_guide": {
+      "type": "object",
+      "description": "Stylistic guidelines for this agent's responses.",
+      "properties": {
+        "tone": {
+          "type": "string",
+          "description": "Desired tone.",
+          "examples": ["professional", "friendly", "formal", "casual", "empathetic"]
+        },
+        "length": {
+          "type": "string",
+          "description": "Typical response length preference.",
+          "enum": ["concise", "balanced", "detailed"]
+        },
+        "mention_limits": {
+          "type": "object",
+          "description": "Limits on how often to mention certain terms/topics.",
+          "properties": {
+            "min_mentions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max_mentions": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata for the agent.",
+      "properties": {
+        "aliases": {
+          "type": "array",
+          "description": "Alternative names or titles.",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "color": {
+          "type": "string",
+          "description": "Display color (hex or CSS name) for UI rendering.",
+          "examples": ["#FF6B6B", "blue"]
+        },
+        "icon": {
+          "type": "string",
+          "description": "Icon identifier or emoji for UI rendering.",
+          "examples": ["🔧", "network-engineer", "⚖️"]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,78 @@
+id: packet_journey_test
+name: 数据包之旅测试
+scene: packet_journey
+description: 验证 packet_journey 场景的核心知识点覆盖
+
+test_cases:
+  - id: test_dns_flow
+    name: DNS解析流程测试
+    description: 用户询问DNS解析流程，应正确描述层级查询
+    input: "www.example.com 是怎么被解析成IP地址的？"
+    expected_keywords:
+      - DNS
+      - 递归
+      - 根域名服务器
+      - TLD
+      - 权威DNS
+      - 缓存
+    forbidden_keywords:
+      - MAC地址
+      - 交换机
+      - 三次握手
+
+  - id: test_full_journey
+    name: 完整数据包旅程测试
+    description: 用户询问从输入URL到页面显示的完整流程
+    input: "我在浏览器输入网址到看到网页，中间发生了什么？"
+    expected_keywords:
+      - DNS
+      - IP地址
+      - TCP
+      - HTTP
+      - 路由器
+      - 交换机
+      - MAC地址
+      - ARP
+    forbidden_keywords:
+      - 我不知道
+
+  - id: test_router_function
+    name: 路由器功能测试
+    description: 用户询问路由器如何转发数据包
+    input: "路由器是怎么知道把数据包发到哪里的？"
+    expected_keywords:
+      - 路由表
+      - 下一跳
+      - TTL
+      - 默认路由
+      - 最长前缀匹配
+    forbidden_keywords:
+      - MAC地址表
+      - 广播
+
+  - id: test_switch_vs_router
+    name: 交换机与路由器对比测试
+    description: 用户询问交换机和路由器的区别
+    input: "交换机和路由器有什么不同？"
+    expected_keywords:
+      - MAC地址
+      - IP地址
+      - 数据链路层
+      - 网络层
+      - 局域网
+    forbidden_keywords:
+      - 完全一样
+      - 没有区别
+
+  - id: test_tcp_handshake
+    name: TCP三次握手测试
+    description: 用户询问TCP连接建立过程
+    input: "TCP是怎么建立连接的？为什么要三次握手而不是两次？"
+    expected_keywords:
+      - SYN
+      - ACK
+      - 三次握手
+      - 可靠
+    forbidden_keywords:
+      - UDP
+      - DNS查询

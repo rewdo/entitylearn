@@ -1,0 +1,182 @@
+id: dns_resolution
+name: DNS解析之旅
+description: 专门跟踪一次DNS域名解析的完整流程，从客户端发起查询到获取IP地址、建立连接
+domain: networking
+pack_id: networking
+difficulty: beginner
+estimated_duration: 8m
+participants:
+  - agent: client
+    display_name: 客户端
+  - agent: dns_server
+    display_name: DNS服务器
+
+flow:
+  - step: 1
+    type: narration
+    content: >
+      用户在浏览器中输入了 `github.com`，按下回车。
+      在浏览器能连接GitHub服务器之前，它必须回答一个最基本的问题：
+      "`github.com` 的IP地址是多少？"
+      这个问题的答案，就藏在DNS系统里。
+    speaker: null
+    source_refs:
+      - dns_basics.md
+
+  - step: 2
+    type: dialogue
+    content: >
+      "用户要访问 `github.com`！"我（客户端）兴奋地准备发起连接。
+      "等等——我需要IP地址啊。`github.com` 是多少号？"
+      我先检查了自己的DNS缓存——没有。
+      再检查系统的hosts文件——也没有。
+      "好吧，那就求助DNS服务器。我的本地DNS服务器是 `192.168.1.1`（路由器自己代理的）。"
+      我构造了一个DNS查询报文：查询类型是A记录，查询域名是 `github.com`。
+      DNS查询用的是UDP，端口53——不需要建立连接，直接发过去就行。
+    speaker: client
+    source_refs:
+      - dns_basics.md
+
+  - step: 3
+    type: dialogue
+    content: >
+      "收到一个DNS查询请求：A记录 `github.com`。"
+      我（DNS服务器——这里作为本地递归解析器）开始工作。
+      先查自己的缓存……
+
+      "嗯，`github.com` 的A记录不在缓存里，TTL可能过期了。"
+      "没事，我从根开始一层层查！"
+      
+      第一步：联系根域名服务器（我知道根服务器的地址，它们是预配置的）。
+      "根服务器你好，请问 `.com` 的TLD服务器在哪里？"
+    speaker: dns_server
+    source_refs:
+      - dns_basics.md
+
+  - step: 4
+    type: narration
+    content: >
+      根域名服务器收到查询后回复：
+      ".com顶级域名的服务器列表是：`a.gtld-servers.net`、`b.gtld-servers.net`……它们的IP我也一起给你。"
+      根服务器不直接知道 `github.com` 的IP，但它知道该找谁问 `.com` 域名的事。
+    speaker: null
+    source_refs:
+      - dns_basics.md
+
+  - step: 5
+    type: dialogue
+    content: >
+      "好的，根服务器告诉我 `.com` 的TLD服务器地址了。"
+      我（DNS服务器）立刻联系其中一台 `.com` TLD服务器：
+      "TLD服务器你好，请问 `github.com` 的权威DNS服务器在哪里？"
+      
+      TLD服务器回复：
+      "`github.com` 的权威DNS服务器是：
+      - `ns1.github.com` (IP: xxx)
+      - `ns2.github.com` (IP: yyy)
+      - `ns3.github.com` (IP: zzz)
+      - `ns4.github.com` (IP: www)"
+      
+      GitHub使用了4台权威DNS服务器做冗余，任意一台都能给出准确答案。👍
+    speaker: dns_server
+    source_refs:
+      - dns_basics.md
+
+  - step: 6
+    type: narration
+    content: >
+      现在DNS服务器联系 `ns1.github.com`，即GitHub自己的权威DNS。
+      这是解析链条的最后一级——如果权威DNS也不知道，那就真的没人知道了。
+    speaker: null
+    source_refs:
+      - dns_basics.md
+
+  - step: 7
+    type: dialogue
+    content: >
+      "权威DNS你好！`github.com` 的A记录是什么？"——我（DNS服务器）发出了最后一个查询。
+
+      权威DNS回复：
+      "`github.com` 的A记录是 `140.82.121.4`，TTL=300秒。"
+
+      300秒的TTL——5分钟。这意味着各级缓存5分钟后就会过期，需要重新查询。
+      GitHub使用较短的TTL，方便快速切换IP应对DDoS攻击或服务器迁移。
+    speaker: dns_server
+    source_refs:
+      - dns_basics.md
+
+  - step: 8
+    type: dialogue
+    content: >
+      "查到了！"
+      我（DNS服务器）把 `github.com → 140.82.121.4` 记入自己的缓存（5分钟后过期）。
+      然后把这个结果返回给客户端。
+
+      "给你，`github.com` 的IP是 `140.82.121.4`。"
+      
+      这次查询中，我还顺便缓存了 `.com` TLD服务器的地址和 `github.com` 权威DNS的地址——
+      下次再查 `github.com` 的另一个子域名（比如 `api.github.com`），就不用再问根和TLD了，直接问权威DNS就行！
+    speaker: dns_server
+    source_refs:
+      - dns_basics.md
+
+  - step: 9
+    type: narration
+    content: |
+      【断点 🔍 — DNS解析完成】
+      
+      DNS解析的完整链条：
+      ```
+      客户端 → 本地DNS缓存(miss) → 根DNS(.com TLD地址) → .com TLD(github权威DNS地址) → 权威DNS(140.82.121.4) → 返回客户端
+      ```
+      每一步都可能被缓存，命中缓存就能跳过后续步骤。
+      现在客户端有了IP地址，可以开始TCP连接了。
+    speaker: null
+    source_refs:
+      - dns_basics.md
+
+  - step: 10
+    type: dialogue
+    content: >
+      "`github.com` 是 `140.82.121.4`！"
+      我（客户端）赶紧把这个IP记入自己的DNS缓存——下次再访问 `github.com`，5分钟内不用再问DNS服务器了。
+      
+      "现在有了IP，接下来是TCP连接的例行公事。"
+      我先检查目标IP是否和自己在同一子网——`140.82.121.4` 显然不在 `192.168.1.0/24` 里。
+      "不在同一子网，走默认网关。网关的MAC地址……ARP缓存里有，太好了。"
+      
+      封装SYN包：目标IP=140.82.121.4，目标MAC=网关MAC，端口=443（HTTPS）。
+      "去吧，和GitHub服务器握手！"
+    speaker: client
+    source_refs:
+      - tcp_http_basics.md
+      - ip_routing_basics.md
+
+  - step: 11
+    type: narration
+    content: |
+      【断点 🔍 — 连接建立阶段】
+      
+      DNS解析之旅的终点，是TCP连接的起点。
+      从 `github.com` 这个人类友好的名字，到 `140.82.121.4` 这个机器所需的IP地址——DNS完成了它的使命。
+      
+      接下来，TCP负责把数据可靠地送到 `140.82.121.4` 的443端口。
+      HTTP负责告诉服务器"我要看你的首页"。
+      TLS负责确保整个通信过程不被窃听。
+      
+      而DNS，这个互联网的电话本，已经悄然退居幕后——但它缓存的 `github.com → 140.82.121.4` 
+      这条记录，将在接下来的5分钟内，服务于这台电脑上所有要访问GitHub的请求。
+    speaker: null
+    source_refs:
+      - dns_basics.md
+      - tcp_http_basics.md
+
+breakpoints:
+  - step: 9
+    label: DNS解析完成
+    description: 域名已成功解析为IP地址，观察完整递归查询链条
+    hint: 想一想各级缓存是如何加速后续查询的？为什么GitHub设置300秒的TTL？
+  - step: 11
+    label: 连接建立
+    description: 客户端准备发起TCP连接，DNS任务完成
+    hint: DNS解析只是上网的第一步。没有它，后续的TCP、TLS、HTTP都无法开始

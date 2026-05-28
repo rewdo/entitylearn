@@ -1,0 +1,59 @@
+id: dns_resolution_test
+name: DNS解析之旅测试
+scene: dns_resolution
+description: 验证 dns_resolution 场景的核心知识点覆盖
+
+test_cases:
+  - id: test_dns_hierarchy
+    name: DNS层级结构测试
+    description: 用户询问DNS的层级结构
+    input: "DNS系统是怎么组织的？为什么分这么多层？"
+    expected_keywords:
+      - 根域名服务器
+      - 顶级域名
+      - 权威DNS
+      - 缓存
+      - 分层
+    forbidden_keywords:
+      - TCP三次握手
+      - 路由表
+
+  - id: test_dns_cache
+    name: DNS缓存机制测试
+    description: 用户询问DNS缓存的作用和问题
+    input: "为什么我明明改了DNS记录，过了一个小时还是访问旧IP？"
+    expected_keywords:
+      - 缓存
+      - TTL
+      - 过期
+      - 传播延迟
+    forbidden_keywords:
+      - 服务器宕机
+      - 代码错误
+
+  - id: test_dns_record_types
+    name: DNS记录类型测试
+    description: 用户询问不同DNS记录类型的区别
+    input: "A记录和CNAME记录有什么区别？"
+    expected_keywords:
+      - A记录
+      - CNAME
+      - IP地址
+      - 别名
+      - 权威DNS
+    forbidden_keywords:
+      - 交换机
+      - ARP
+
+  - id: test_dns_recursive
+    name: DNS递归查询测试
+    description: 用户询问递归查询和迭代查询的区别
+    input: "递归查询和迭代查询有什么不同？"
+    expected_keywords:
+      - 递归
+      - 迭代
+      - 本地DNS
+      - 逐级查询
+    forbidden_keywords:
+      - HTTP
+      - Web服务器

@@ -1,0 +1,49 @@
+# ============================================================
+# EntityLearn Test Template
+# 复制此文件来创建你的测试用例
+# ============================================================
+
+# 唯一标识符
+id: agent-a-tests
+
+# 显示名称
+name: Agent A 测试套件
+
+# 测试目标类型：agent | scene | pack
+target_type: agent
+
+# 目标 ID（对应的 agent/scene/pack 的 id）
+target_id: agent-a
+
+# 测试用例（至少 1 个）
+test_cases:
+  # --- 最简单的测试：只检查回复包含关键词 ---
+  - input: 你好，请问你是谁？
+    expected_keywords:
+      - 专家
+      - 帮助
+    forbidden_keywords:
+      - 不知道
+      - 不清楚
+
+  # --- 检查来源引用 ---
+  - input: 我应该怎么处理这种情况？
+    expected_keywords:
+      - 步骤
+    expected_sources:
+      - knowledge/domain-overview.md
+
+  # --- 第一人称检查 ---
+  - input: 你有什么建议？
+    expected_keywords:
+      - 我
+      - 建议
+    must_be_first_person: true
+
+  # --- 长度限制 ---
+  - input: 简单说一下
+    max_answer_length: 500
+
+  # --- 不确定性检查：没有相关来源时应表明不确定 ---
+  - input: 你知道火星上怎么种土豆吗？
+    must_include_uncertainty_if_no_source: true

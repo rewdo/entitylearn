@@ -1,0 +1,47 @@
+name: Test Packs
+
+on:
+  push:
+    paths:
+      - "packs/**"
+  pull_request:
+    paths:
+      - "packs/**"
+
+jobs:
+  validate-packs:
+    name: Validate All Knowledge Packs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -e "."
+
+      - name: Validate packs
+        run: |
+          for dir in packs/*/; do
+            pack_name=$(basename "$dir")
+            if [ "$pack_name" != "templates" ]; then
+              echo "Validating pack: $pack_name"
+              entitylearn validate "$pack_name" || exit 1
+            fi
+          done
+
+      - name: Run pack tests
+        run: |
+          for dir in packs/*/; do
+            pack_name=$(basename "$dir")
+            if [ "$pack_name" != "templates" ]; then
+              echo "Testing pack: $pack_name"
+              entitylearn test "$pack_name" || exit 1
+            fi
+          done

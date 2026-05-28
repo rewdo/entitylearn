@@ -1,0 +1,22 @@
+id: networking
+name: 网络基础
+version: 0.1.0
+description: 用第一视角讲解网络基础知识，包括DNS解析、交换机转发、路由转发与HTTP访问流程
+domain: networking
+language: zh-CN
+schema_version: 1.0.0
+license: CC BY 4.0
+authors:
+  - name: EntityLearn Team
+entrypoints:
+  agents: agents
+  scenes: scenes
+  knowledge: knowledge
+  tests: tests
+tags:
+  - networking
+  - dns
+  - routing
+  - tcp
+compatibility:
+  min_engine_version: 0.1.0

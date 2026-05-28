@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://entitylearn.dev/schema/test.schema.json",
+  "title": "Test Schema",
+  "description": "Schema definition for EntityLearn test cases (test.yaml)",
+  "type": "object",
+  "required": ["id", "name", "target_type", "target_id", "test_cases"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the test suite.",
+      "pattern": "^[a-z0-9_-]+$",
+      "minLength": 2,
+      "maxLength": 64
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable test suite name.",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "target_type": {
+      "type": "string",
+      "description": "Type of entity being tested.",
+      "enum": ["agent", "scene", "pack"]
+    },
+    "target_id": {
+      "type": "string",
+      "description": "ID of the specific agent, scene, or pack being tested."
+    },
+    "test_cases": {
+      "type": "array",
+      "description": "Individual test cases.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["input"],
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "The user input to test against.",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "expected_keywords": {
+            "type": "array",
+            "description": "Keywords that should appear in the response.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "forbidden_keywords": {
+            "type": "array",
+            "description": "Keywords that must NOT appear in the response.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "expected_sources": {
+            "type": "array",
+            "description": "Knowledge sources that should be referenced in the response.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "max_answer_length": {
+            "type": "integer",
+            "description": "Maximum acceptable response length in characters.",
+            "minimum": 1
+          },
+          "must_be_first_person": {
+            "type": "boolean",
+            "description": "Whether the response must be in first person."
+          },
+          "must_include_uncertainty_if_no_source": {
+            "type": "boolean",
+            "description": "Whether the response must indicate uncertainty when no source is available."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

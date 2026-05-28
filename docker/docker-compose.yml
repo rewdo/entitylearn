@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  # EntityLearn API & Backend
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: entitylearn-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount packs directory for live development
+      - ../packs:/app/packs:ro
+      # Data persistence
+      - entitylearn-data:/app/data
+    environment:
+      - ENTITYLEARN_ENV=production
+      - ENTITYLEARN_LOG_LEVEL=info
+      # LLM configuration (adjust as needed)
+      - LLM_API_BASE=${LLM_API_BASE:-http://localhost:11434/v1}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      # Embedding configuration
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - entitylearn-net
+
+  # Web UI Frontend (Next.js)
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: entitylearn-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - entitylearn-net
+
+volumes:
+  entitylearn-data:
+
+networks:
+  entitylearn-net:
+    driver: bridge

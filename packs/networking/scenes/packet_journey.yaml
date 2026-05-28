@@ -1,0 +1,289 @@
+id: packet_journey
+name: 数据包之旅
+description: 跟随一个HTTP请求，从客户端输入URL开始，经历DNS解析、交换机转发、路由器路由，最终到达Web服务器的完整旅程，再原路返回
+domain: networking
+pack_id: networking
+difficulty: intermediate
+estimated_duration: 15m
+participants:
+  - agent: client
+    display_name: 客户端（浏览器）
+  - agent: switch
+    display_name: 交换机
+  - agent: router
+    display_name: 路由器
+  - agent: dns_server
+    display_name: DNS服务器
+  - agent: web_server
+    display_name: Web服务器
+
+flow:
+  - step: 1
+    type: narration
+    content: |
+      这是一个普通的下午。用户打开浏览器，在地址栏输入了 `www.example.com`，然后按下回车。
+      一个HTTP请求的旅程，就此开始——但数据包自己可不知道 `www.example.com` 是谁。
+      它需要先问清楚：这个域名对应的IP地址是什么？
+    speaker: null
+    source_refs:
+      - dns_basics.md
+
+  - step: 2
+    type: dialogue
+    content: |
+      "哎呀，用户输入了一个域名！"我（客户端）有点兴奋，"但我需要的是IP地址啊……`www.example.com` 到底是多少？"
+      我翻了翻自己的DNS缓存——没有记录。
+      "好吧，得问DNS服务器了。"
+    speaker: client
+    source_refs:
+      - dns_basics.md
+
+  - step: 3
+    type: dialogue
+    content: |
+      "收到一个DNS查询请求——`www.example.com` 的A记录。"
+      我（DNS服务器）先查了自己的缓存：本地有 `.com` 顶级域服务器的地址，但 `example.com` 的权威DNS地址不在缓存里。
+      "别急，让我一层层问上去。"
+      我先联系根域名服务器："`.com` 的TLD服务器在哪？"——根说："在 `a.gtld-servers.net`。"
+      再联系TLD服务器："`example.com` 的权威DNS在哪？"——TLD说："`ns1.example.com`。"
+      最后联系权威DNS："`www.example.com` 的IP是什么？"
+    speaker: dns_server
+    source_refs:
+      - dns_basics.md
+
+  - step: 4
+    type: narration
+    content: |
+      DNS服务器完成递归查询后，得到答案：`www.example.com` → `93.184.216.34`。
+      它把这个结果缓存下来（TTL=3600秒），然后返回给客户端。
+    speaker: null
+    source_refs:
+      - dns_basics.md
+
+  - step: 5
+    type: dialogue
+    content: |
+      "太好了！DNS告诉我 `www.example.com` 的IP是 `93.184.216.34`！"
+      我（客户端）把这个IP也记入了自己的DNS缓存，下次就不用再问了。
+      "现在……IP有了，但MAC地址呢？同一个局域网内通信需要MAC地址。"
+      我看了看目标IP——`93.184.216.34`，又看了看自己的IP——`192.168.1.10/24`。
+      "子网掩码一算，不对，不在同一个子网！不能直接问MAC，得走默认网关。"
+      所以我得先知道默认网关 `192.168.1.1` 的MAC地址。查ARP缓存——有了，`192.168.1.1 → AA:BB:CC:DD:EE:01`。
+      "好，开始封装数据包！"
+    speaker: client
+    source_refs:
+      - ethernet_basics.md
+      - ip_routing_basics.md
+
+  - step: 6
+    type: narration
+    content: |
+      【断点 🔍 — DNS解析完成，数据包即将出发】
+      
+      此时数据包的状态：
+      - 目标IP：93.184.216.34
+      - 目标MAC：AA:BB:CC:DD:EE:01（默认网关的MAC）
+      - TCP连接尚未建立，即将发出SYN包
+      
+      点击继续，看看这个数据包如何在网络中穿行。
+    speaker: null
+    source_refs:
+      - tcp_http_basics.md
+
+  - step: 7
+    type: dialogue
+    content: |
+      "我先把TCP三次握手的第一个SYN包发出去。"
+      我（客户端）封装好数据帧：目标MAC是默认网关的MAC，目标IP是 `93.184.216.34`，TCP标志位SYN=1。
+      "去吧！飞向互联网！"
+      数据帧从网卡发出，沿着网线……来到了交换机面前。
+    speaker: client
+    source_refs:
+      - tcp_http_basics.md
+
+  - step: 8
+    type: dialogue
+    content: |
+      "有帧到了！"我（交换机）收到一个以太网帧。
+      我瞟了一眼目标MAC地址——`AA:BB:CC:DD:EE:01`。
+      "嗯……查到MAC地址表里，`AA:BB:CC:DD:EE:01` 在端口1，这个帧也从端口1进来的啊……不对，目标MAC在别的端口——哦不，在端口4！"
+      我迅速把帧从端口4转发出去。
+      "我的工作到此为止。什么IP、什么TCP，我一概不管，只认MAC地址。后面的路，交给路由器吧。"
+      （顺便说一句，我还悄悄把源MAC `BB:BB:BB:BB:BB:01` 记了下来——在端口3——以后发往这个MAC的帧就不用广播了。）
+    speaker: switch
+    source_refs:
+      - ethernet_basics.md
+
+  - step: 9
+    type: narration
+    content: |
+      数据帧经过交换机转发，到达了路由器的LAN口。
+      帧的目标MAC是路由器自己的MAC地址，路由器接收它，开始处理IP层。
+    speaker: null
+    source_refs:
+      - ip_routing_basics.md
+
+  - step: 10
+    type: dialogue
+    content: |
+      "帧是给我的（目标MAC匹配），拆开看看IP层。"
+      我（路由器）剥掉以太网帧头，看到IP数据包：目标IP `93.184.216.34`。
+      
+      "让我查路由表……"
+      我先看有没有直连路由——没有，`93.184.216.0/24` 不在我的直连网段里。
+      再看静态和动态路由：有一条去往 `0.0.0.0/0` 的默认路由，下一跳是运营商的网关 `10.0.0.1`，出口接口是WAN口eth1。
+      "最长匹配就是默认路由了。下一跳：`10.0.0.1`。TTL从64减到63。"
+      
+      我对帧重新封装：目标MAC改成下一跳 `10.0.0.1` 的MAC（通过ARP查到的），源MAC改成自己的WAN口MAC。
+      "一路顺风！"
+    speaker: router
+    source_refs:
+      - ip_routing_basics.md
+
+  - step: 11
+    type: narration
+    content: |
+      【断点 🔍 — 数据包离开家庭路由器】
+      
+      现在数据包已经进入运营商网络。在到达 `93.184.216.34` 之前，它还将经过：
+      - 运营商的汇聚路由器
+      - 骨干网路由器
+      - 目标机房的边界路由器
+      
+      每一跳TTL减1，每一跳都根据路由表选择最优路径。
+      互联网就是这样一层层转发，把数据包送到世界任何一个角落。
+    speaker: null
+    source_refs:
+      - ip_routing_basics.md
+
+  - step: 12
+    type: narration
+    content: |
+      经过多个路由器的逐跳转发，TTL从63逐步递减，最终数据包到达了目标网络。
+      目标Web服务器的IP就是 `93.184.216.34`。
+      最后一跳路由器发出ARP请求，得到服务器的MAC地址，封装帧后发送到交换机。
+      交换机查MAC地址表，精确转发到Web服务器所在的端口。
+    speaker: null
+    source_refs:
+      - ip_routing_basics.md
+      - ethernet_basics.md
+
+  - step: 13
+    type: dialogue
+    content: |
+      "咦？有数据包来了。"
+      我（Web服务器）在80端口上监听，收到了一个TCP SYN包——目标IP是我的，目标端口是80。
+      "有人想建立TCP连接！SYN包的seq=100。"
+      我回复SYN-ACK：seq=200，ack=101——"收到你的连接请求，我能和你连，请确认！"
+      
+      很快，客户端的ACK到了——ack=201。
+      "三次握手完成！TCP连接已建立。现在等它发HTTP请求过来。"
+    speaker: web_server
+    source_refs:
+      - tcp_http_basics.md
+
+  - step: 14
+    type: dialogue
+    content: |
+      "TCP连接建立了！"我（客户端）收到了SYN-ACK，发出了ACK确认，三次握手完成。
+      "现在可以发HTTP请求了。"
+      我构造了一个HTTP GET请求：
+      ```
+      GET /index.html HTTP/1.1
+      Host: www.example.com
+      User-Agent: MyBrowser/1.0
+      Accept: text/html
+      ```
+      请求被封装进TCP段，再封装进IP包，再封装进以太网帧……又踏上了去往Web服务器的征途。
+      这次路径和SYN包差不多，交换机→路由器→……→目标网络→Web服务器。
+    speaker: client
+    source_refs:
+      - tcp_http_basics.md
+
+  - step: 15
+    type: dialogue
+    content: |
+      "HTTP请求来了！"我（Web服务器）收到GET请求。
+      "让我看看——要访问 `/index.html`，Host是 `www.example.com`……"
+      我找到对应的HTML文件，状态码200 OK，Content-Type设置为 `text/html; charset=utf-8`。
+      ```
+      HTTP/1.1 200 OK
+      Content-Type: text/html; charset=utf-8
+      Content-Length: 1234
+      
+      <!DOCTYPE html>
+      <html>
+      <head><title>Example</title></head>
+      <body><h1>Hello World!</h1></body>
+      </html>
+      ```
+      "响应打包好了，原路返回！"
+    speaker: web_server
+    source_refs:
+      - tcp_http_basics.md
+
+  - step: 16
+    type: narration
+    content: |
+      HTTP响应沿着来时的路径原路返回：
+      服务器 → 交换机 → 路由器 → 运营商网络 → 家庭路由器 → 交换机 → 客户端。
+      
+      每一跳依然是查表转发，但因为沿途设备已经学习了MAC地址映射（交换机）和路由信息，转发效率很高。
+    speaker: null
+    source_refs:
+      - ethernet_basics.md
+      - ip_routing_basics.md
+
+  - step: 17
+    type: dialogue
+    content: |
+      "响应回来了！"我（客户端）收到了HTTP 200 OK响应。
+      "状态码200，一切正常！"
+      我解析HTML，渲染页面——用户在屏幕上看到了 `Hello World!`。
+      
+      "网页加载完成。接下来优雅地关闭连接。"
+      我发起四次挥手：FIN → 服务器ACK → 服务器FIN → 我ACK。
+      进入TIME-WAIT状态，等待2MSL（确保最后的ACK到达服务器），然后彻底关闭连接。
+      "任务完成！从输入URL到页面显示，看起来只是一瞬间——但背后经过了这么多步骤。"
+    speaker: client
+    source_refs:
+      - tcp_http_basics.md
+
+  - step: 18
+    type: narration
+    content: |
+      【断点 🔍 — 旅程终点】
+      
+      回顾整个旅程，一个HTTP请求经历了：
+      1. DNS解析：域名 → IP地址
+      2. ARP查询：IP → MAC地址（网关）
+      3. TCP三次握手：建立可靠连接
+      4. 交换机转发：基于MAC地址的局域网转发
+      5. 路由器转发：基于IP地址的跨网络路由
+      6. HTTP请求到达服务器
+      7. HTTP响应原路返回
+      8. TCP四次挥手：优雅关闭连接
+      9. 浏览器渲染：用户看到页面
+      
+      这就是互联网通信的完整图景——每一层各司其职，协同工作，让世界互联。
+    speaker: null
+    source_refs:
+      - osi_layers.md
+      - dns_basics.md
+      - ethernet_basics.md
+      - ip_routing_basics.md
+      - tcp_http_basics.md
+
+breakpoints:
+  - step: 6
+    label: DNS解析完成
+    description: DNS已将域名解析为IP地址，数据包封装完毕，即将通过网络发出
+    hint: 注意观察数据包的源/目标IP和源/目标MAC是如何变化的
+  - step: 11
+    label: 离开家庭网络
+    description: 数据包已通过家庭路由器，进入运营商骨干网络
+    hint: 思考路由表的默认路由如何工作——家庭路由器并不需要知道全世界的路由
+  - step: 18
+    label: 旅程终点
+    description: HTTP响应已返回，用户看到页面。回顾完整流程
+    hint: 想一想如果其中任何一环出问题，会看到什么错误提示？

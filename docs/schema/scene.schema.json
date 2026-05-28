@@ -1,0 +1,184 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://entitylearn.dev/schema/scene.schema.json",
+  "title": "Scene Schema",
+  "description": "Schema definition for an EntityLearn scene (scene.yaml)",
+  "type": "object",
+  "required": ["id", "name", "description", "objective", "participants", "flow"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the scene within the pack.",
+      "pattern": "^[a-z0-9_-]+$",
+      "minLength": 2,
+      "maxLength": 64
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable scene name.",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of what this scene simulates.",
+      "minLength": 10,
+      "maxLength": 2048
+    },
+    "objective": {
+      "type": "string",
+      "description": "Learning or interaction objective for this scene.",
+      "minLength": 10,
+      "maxLength": 2048,
+      "examples": ["训练学员在BGP邻居断开时快速定位问题的能力"]
+    },
+    "participants": {
+      "type": "array",
+      "description": "Agents participating in this scene.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["agent_id", "role_in_scene"],
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "description": "Reference to an agent defined in the pack."
+          },
+          "role_in_scene": {
+            "type": "string",
+            "description": "The specific role this agent plays in this scene.",
+            "minLength": 1
+          },
+          "speaking_style": {
+            "type": "string",
+            "description": "Overrides or supplements the agent's default speaking style for this scene.",
+            "maxLength": 2048
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "entry_agent_id": {
+      "type": "string",
+      "description": "ID of the agent that initiates the scene. If not specified, the first participant starts."
+    },
+    "breakpoints": {
+      "type": "array",
+      "description": "Points where user input is expected during the scene.",
+      "items": {
+        "type": "object",
+        "required": ["step_id", "prompt"],
+        "properties": {
+          "step_id": {
+            "type": "string",
+            "description": "Reference to a flow step ID where the breakpoint occurs."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Prompt shown to the user at this breakpoint."
+          },
+          "allowed_agents": {
+            "type": "array",
+            "description": "Which agents the user can interact with at this breakpoint.",
+            "items": { "type": "string" }
+          },
+          "user_input_mode": {
+            "type": "string",
+            "description": "Type of user input expected.",
+            "enum": ["free_text", "single_choice", "multi_choice", "command", "confirmation"],
+            "default": "free_text"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "flow": {
+      "type": "array",
+      "description": "Ordered sequence of steps in the scene.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["step_id", "type"],
+        "properties": {
+          "step_id": {
+            "type": "string",
+            "description": "Unique step identifier.",
+            "pattern": "^[a-z0-9_-]+$"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of flow step.",
+            "enum": ["narration", "dialogue", "breakpoint", "transition"]
+          },
+          "speaker": {
+            "type": "string",
+            "description": "Agent ID or 'system' for narration steps."
+          },
+          "content": {
+            "type": "string",
+            "description": "The content to display or speak in this step.",
+            "maxLength": 16384
+          },
+          "source_refs": {
+            "type": "array",
+            "description": "References to knowledge sources backing this content.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "visual_hint": {
+            "type": "string",
+            "description": "Optional visual context hint (e.g., diagram description).",
+            "maxLength": 2048
+          },
+          "actions": {
+            "type": "array",
+            "description": "Actions to perform at this step.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Type of action."
+                },
+                "params": {
+                  "type": "object",
+                  "description": "Action parameters."
+                }
+              }
+            }
+          },
+          "next_step_id": {
+            "type": "string",
+            "description": "ID of the next step. If omitted, proceeds to the next step in the array."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata for the scene.",
+      "properties": {
+        "difficulty": {
+          "type": "string",
+          "description": "Difficulty level.",
+          "enum": ["beginner", "intermediate", "advanced", "expert"]
+        },
+        "estimated_duration_min": {
+          "type": "integer",
+          "description": "Estimated duration in minutes.",
+          "minimum": 1
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags for categorization.",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
